@@ -1,4 +1,4 @@
-class CreatePosts < ActiveRecord::Migration[6.0]
+class CreatePosts < ActiveRecord::Migration[5.2]
   def change
     create_table :posts do |post|
       post.integer :user_id 

@@ -1,4 +1,4 @@
-class CreateBooktopics < ActiveRecord::Migration[6.0]
+class CreateBooktopics < ActiveRecord::Migration[5.2]
   def change
     create_table :booktopics do |booktopic|
       booktopic.integer :book_id

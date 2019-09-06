@@ -47,6 +47,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord (~> 5.2.3)
   faker
   pry
   require_all
