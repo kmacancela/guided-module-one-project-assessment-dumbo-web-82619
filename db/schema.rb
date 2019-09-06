@@ -12,19 +12,20 @@
 
 ActiveRecord::Schema.define(version: 2019_09_06_162457) do
 
+  create_table "book_topics", force: :cascade do |t|
+    t.integer "book_id"
+    t.integer "topic_id"
+  end
+
   create_table "books", force: :cascade do |t|
     t.string "name"
     t.string "author"
     t.integer "isbn"
   end
 
-  create_table "booktopics", force: :cascade do |t|
-    t.integer "book_id"
-    t.integer "topic_id"
-  end
-
   create_table "courses", force: :cascade do |t|
     t.string "name"
+    t.integer "book_id"
   end
 
   create_table "locations", force: :cascade do |t|
