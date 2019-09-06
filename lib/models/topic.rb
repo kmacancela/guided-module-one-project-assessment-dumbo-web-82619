@@ -1,4 +1,4 @@
 class Topic < ActiveRecord::Base
-    has_many :booktopics
-    has_many :books, through: :booktopics
+    has_many :book_topics
+    has_many :books, through: :book_topics
 end
