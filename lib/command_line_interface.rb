@@ -1,6 +1,3 @@
-# require 'tty-prompt'
-# require 'tty-table'
-
 class CommandLineInterface
 
     attr_reader :prompt
@@ -40,11 +37,36 @@ class CommandLineInterface
         case choice
         when "Create a new post"
             puts "Let's create a new post! Please provide me with some information: "
-            Post.new_post
+            # Post.new_post
+            name = self.prompt.ask("What is the name of your book: ")
+            author = self.prompt.ask("What is the author of your book: ")
+            isbn = self.prompt.ask("What is the ISBN of your book: ")
+            # Find book in Books db table
+            book = Book.find_by(isbn: isbn)
+            # Find book does not exist in db table, then lets add this book
+            if book == nil
+                book = Book.create(name: name, author: author, isbn: isbn)
+            end
+            # Will find the location from the building name that user selects
+            building = self.prompt.select("Choose a location where to meet up: ") do |menu|
+                menu.choice "Powdermaker Hall"
+                menu.choice "I Building"
+                menu.choice "Kiely Hall"
+                menu.choice "Science Building"
+            end
+            location = Location.find_by(building: building)
+            content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
+
+            # Create a new post with information provided by user
+            new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
+            
+            puts new_post
         when "Find a book"
             Book.find_book
         when "View or edit my posts"
-            Post.view_posts
+            self.user.posts.map do |post|
+                puts post.content
+            end
         when "Exit"
             # add what will happen
         end
