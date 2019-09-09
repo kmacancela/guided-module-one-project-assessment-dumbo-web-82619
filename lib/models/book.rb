@@ -4,4 +4,9 @@ class Book < ActiveRecord::Base
     has_many :courses
     has_many :book_topics
     has_many :topics, through: :book_topics
+
+    def self.tty_prompt
+        TTY::Prompt.new
+    end
+    
 end

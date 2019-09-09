@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(version: 2019_09_06_162457) do
   create_table "books", force: :cascade do |t|
     t.string "name"
     t.string "author"
-    t.integer "isbn"
+    t.string "isbn"
   end
 
   create_table "courses", force: :cascade do |t|

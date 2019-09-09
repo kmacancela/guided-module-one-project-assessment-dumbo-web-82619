@@ -30,6 +30,8 @@ class CommandLineInterface
     #     end
     #     puts "Enter your name to view all your posts:"
     #     name = gets.chomp
+
+
     # Will ask user if they are a new or returning user and returns the user object
     def greet
         puts 'Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!'
@@ -60,7 +62,8 @@ class CommandLineInterface
 
         case choice
         when "Create a new post"
-            self.new_post
+            puts "Let's create a new post! Please provide me with some information: "
+            Post.new_post
         when "Find a book"
             # add what will happen
         when "View or edit my posts"
@@ -70,11 +73,6 @@ class CommandLineInterface
         when "Exit"
             # add what will happen
         end
-    end
-
-    # Will allow user to create a new post
-    def new_post
-        puts "INSIDE NEW POST METHOD IN CLI CLASS"
     end
 
     # Will allow uer to find the post(s) of the book they are searching for
