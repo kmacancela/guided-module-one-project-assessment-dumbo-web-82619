@@ -37,7 +37,7 @@ ActiveRecord::Schema.define(version: 2019_09_06_162457) do
     t.integer "book_id"
     t.string "content"
     t.string "date"
-    t.string "status"
+    t.boolean "status"
     t.integer "location_id"
   end
 
@@ -46,6 +46,8 @@ ActiveRecord::Schema.define(version: 2019_09_06_162457) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "username"
+    t.string "password"
     t.string "name"
   end
 
