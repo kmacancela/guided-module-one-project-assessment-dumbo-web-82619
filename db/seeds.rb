@@ -7,7 +7,7 @@ Topic.destroy_all
 Course.destroy_all
 
 # Creating Users
-u1 = User.create(name: "Hannah")
+u1 = User.create(username: "hannah100", password: "hannah", name: "Hannah Jones")
 
 # Creating Books
 b1 = Book.create(name: "Psychology for Beginners", author: "Michelle Brown", isbn: 987654321)
@@ -16,7 +16,7 @@ b1 = Book.create(name: "Psychology for Beginners", author: "Michelle Brown", isb
 l1 = Location.create(building: "Powdermaker Hall")
 
 # Creating Posts
-p1 = Post.create(user_id: u1.id, book_id: b1.id, content: "This book will blow your mind! It is needed for Pysch 101. So contact me if you need it for 10 bucks!", date: "08-30-2019", status: "Not Sold", location_id: l1.id)
+p1 = Post.create(user_id: u1.id, book_id: b1.id, content: "This book will blow your mind! It is needed for Pysch 101. So contact me if you need it for 10 bucks!", date: "08-30-2019", status: true, location_id: l1.id)
 
 # Creating Topics
 t1 = Topic.create(name: "psychology")

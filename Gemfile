@@ -7,3 +7,5 @@ gem "sqlite3"
 gem "pry"
 gem "require_all"
 gem "faker"
+gem 'tty-prompt'
+gem 'tty-table'
