@@ -4,7 +4,7 @@
 class CommandLineInterface
 
     attr_reader :prompt
-    attr_accessor :user
+    attr_accessor :user, :post
     
     def initialize()
         @prompt = TTY::Prompt.new

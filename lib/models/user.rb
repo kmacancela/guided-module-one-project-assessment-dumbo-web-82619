@@ -16,12 +16,7 @@ class User < ActiveRecord::Base
     def self.handle_returning_user
         username = self.tty_prompt.ask("Welcome back! Enter your username: ")
         password = self.tty_prompt.mask("Enter your password: ")
-        puts username
-        puts password
-        #current_user = User.find_by(name: username, password: password)
         User.find_by(username: username, password: password)
-        # puts current_user
-        # current_user.name
     end
 
 end
