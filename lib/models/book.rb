@@ -8,5 +8,10 @@ class Book < ActiveRecord::Base
     def self.tty_prompt
         TTY::Prompt.new
     end
+
+    # Will allow a potential buyer to search for the book they are looking for
+    def self.find_book
+
+    end
     
 end
