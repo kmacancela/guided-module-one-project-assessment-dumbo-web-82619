@@ -23,6 +23,11 @@ class CommandLineInterface
         end 
     end
 
+    # Helper method to generate a select menu for user to make a choice
+    def select_menu(question, choices)
+        self.prompt.select(question, choices)
+    end
+
     # Will return a new post instance 
     def new_post
         puts "Let's create a new post! Please provide me with the following information: "
@@ -74,33 +79,49 @@ class CommandLineInterface
     end
     
     def edit_post
-        choice = self.prompt.select("Please choose which post to edit: ", self.view_posts)
+        choice = self.select_menu("Please choose which post to edit: ", self.view_posts)
+        # field = self.prompt.multi_select("Which field(s): ", ["Content", "Status", "Location", "Main Menu"])
+        field = self.select_menu("Which field would you like to update: ", ["Content", "Status", "Location"])
+        post = Post.find_by(content: choice)
 
+        case field
+        when "Content"
+            new_content = self.prompt.ask("Please provide a new content: ")
+            post.update(content: new_content)
+            puts "Here is the new post: "
+            puts post.content
+        when "Status"
+            status_changed = self.prompt.select("Has your book been sold? ", {Yes: 0, No: 1})
+            if status_changed == 0 # false, meaning post is not active anymore
+                post.update(status: 0)
+                puts "Your post status has changed to #{post.status}! Congrats on the sale!"
+            else
+                post.update(status: 1)
+                puts "Your post status has changed to #{post.status}! It is visible to potential buyers."
+            end
+        end
     end
 
     def delete_post
-        choice = self.prompt.select("Please choose which post to delete: ", self.view_posts)
+        choice = self.select_menu("Please choose which post to delete: ", self.view_posts)
+        confirm = self.prompt.select("Are you sure you wish to delete this post? ", ["Yes", "No"])
+        if confirm == "Yes"
+            post = Post.find_by(content: choice)
+            post.destroy
+            puts "Your post has been deleted!"
+        end
+        # return to main menu
     end
 
     # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
     def posts
-        choice = self.prompt.select("Hi there, #{self.user.name}! What would you like to do today?") do |menu|
-            menu.choice "Create a new post"
-            menu.choice "Find a book"
-            menu.choice "View or edit my posts"
-            menu.choice "Exit"
-        end
+        choice = self.select_menu("Hi there, #{self.user.name}! What would you like to do today?", ["Create a new post", "Find a book", "View or edit my posts", "Exit"])
 
         case choice
         when "Create a new post"
             self.new_post
             puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
-            choice = self.prompt.select("What would you like to do now, #{self.user.name}? ") do |menu|
-                menu.choice "Edit this post"
-                menu.choice "Delete this post"
-                menu.choice "View all my posts"
-                menu.choice "Logout"
-            end
+            choice = self.select_menu("What would you like to do now, #{self.user.name}? ", ["Edit this post", "Delete this post", "View all my posts", "Logout"])
 
             # Choices after user has uploaded a new post
             case choice
