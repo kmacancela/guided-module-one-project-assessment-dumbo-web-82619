@@ -7,16 +7,14 @@ class CommandLineInterface
         @prompt = TTY::Prompt.new
     end
 
-    # Will ask user if they are a new or returning user and returns the user object
+    # Will ask user if they are a new or returning user and returns the User object
     def greet
-        puts 'Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!'
-        # Using TTY Prompt, will let user select if they are a new or returning user
-        choice = self.prompt.select("Are you a new user or returning user?") do |menu|
+        choice = self.prompt.select("Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!\nAre you a new user or returning user?") do |menu|
             menu.choice "New User"
             menu.choice "Returning User"
         end
 
-        # Based on the user's choice, will redirect them to the appropriate method
+        # Based on the user's choice, will redirect them to the appropriate User method
         case choice
         when "New User"
             User.handle_new_user
@@ -37,7 +35,6 @@ class CommandLineInterface
         case choice
         when "Create a new post"
             puts "Let's create a new post! Please provide me with some information: "
-            # Post.new_post
             name = self.prompt.ask("What is the name of your book: ")
             author = self.prompt.ask("What is the author of your book: ")
             isbn = self.prompt.ask("What is the ISBN of your book: ")
