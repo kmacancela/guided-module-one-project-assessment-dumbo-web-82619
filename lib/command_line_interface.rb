@@ -41,21 +41,29 @@ class CommandLineInterface
             book = Book.create(name: name, author: author, isbn: isbn)
         end
         # Will find the location from the building name that user selects
-        building = self.prompt.select("Choose a location where to meet up: ") do |menu|
-            menu.choice "Powdermaker Hall"
-            menu.choice "I Building"
-            menu.choice "Kiely Hall"
-            menu.choice "Science Building"
-        end
+        building = self.prompt.select("Choose a location where to meet up: ", ["Powdermaker Hall", "I Building", "Kiely Hall", "Science Building"])
         location = Location.find_by(building: building)
         content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
         # Creates a new post with information provided by user
         new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
+
+        puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
+        choice = self.select_menu("What would you like to do now, #{self.user.name}? ", ["Edit this post", "Delete this post", "Return to main menu"])
+
+        # Choices after user has uploaded a new post
+        case choice
+        when "Edit this post"
+            self.edit_post(new_post)
+        when "Delete this post"
+            self.delete_post(new_post)
+        when "Return to main menu"
+            self.main_menu
+        end
     end
 
     def view_edit_posts
         puts "Here are all your posts: "
-        self.view_posts
+        puts self.view_posts
         choice = self.prompt.select("What would you like to do: ") do |menu|
             menu.choice "Edit a post"
             menu.choice "Delete a post"
@@ -68,7 +76,7 @@ class CommandLineInterface
         when "Delete a post"
             self.delete_post
         when "Return to main menu"
-            # method to return to main menu
+            self.main_menu
         end
     end
 
@@ -78,11 +86,13 @@ class CommandLineInterface
         end
     end
     
-    def edit_post
-        choice = self.select_menu("Please choose which post to edit: ", self.view_posts)
-        # field = self.prompt.multi_select("Which field(s): ", ["Content", "Status", "Location", "Main Menu"])
+    def edit_post(post = nil)
+        if post == nil
+            choice = self.select_menu("Please choose which post to edit: ", self.view_posts)
+            post = Post.find_by(content: choice)
+        end
+        # Check how to do multi select for the below so user can edit more than 1 field
         field = self.select_menu("Which field would you like to update: ", ["Content", "Status", "Location"])
-        post = Post.find_by(content: choice)
 
         case field
         when "Content"
@@ -102,47 +112,33 @@ class CommandLineInterface
         end
     end
 
-    def delete_post
-        choice = self.select_menu("Please choose which post to delete: ", self.view_posts)
+    def delete_post(post = nil)
+        if post == nil
+            choice = self.select_menu("Please choose which post to delete: ", self.view_posts)
+            post = Post.find_by(content: choice)
+        end
         confirm = self.prompt.select("Are you sure you wish to delete this post? ", ["Yes", "No"])
         if confirm == "Yes"
-            post = Post.find_by(content: choice)
             post.destroy
             puts "Your post has been deleted!"
         end
-        # return to main menu
+        self.main_menu
     end
 
     # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
-    def posts
+    def main_menu
         choice = self.select_menu("Hi there, #{self.user.name}! What would you like to do today?", ["Create a new post", "Find a book", "View or edit my posts", "Exit"])
 
         case choice
         when "Create a new post"
             self.new_post
-            puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
-            choice = self.select_menu("What would you like to do now, #{self.user.name}? ", ["Edit this post", "Delete this post", "View all my posts", "Logout"])
-
-            # Choices after user has uploaded a new post
-            case choice
-            when "Edit this post"
-                option = self.prompt.select("Please choose which field to edit: ") do |menu|
-                    menu.choice ""
-                end
-            when "Delete this post"
-
-            when "View all my posts"
-
-            when "Logout"
-
-            end
-
         when "Find a book"
             Book.find_book
         when "View or edit my posts"
             self.view_edit_posts
         when "Exit"
-            # add what will happen
+            puts "Goodbye!"
+            exit
         end
     end
 
