@@ -20,12 +20,16 @@ class Book < ActiveRecord::Base
         case choice
         when "Title"
             title = self.prompt.ask("Please enter the title: ")
-            title = Book.find_by(name: "%#{title}%")
-            if title == nil
-                puts "Sorry, there are no posts for #{title} at the moment. Check back soon!"
+            book = Book.where('name LIKE ?', "%#{title}%")
+            if book[0] == nil || book[0].posts == nil
+                puts "Sorry, there are no posts for \"#{title}\" at the moment. Check back soon!"
                 # Add main menu method here
             else
-                
+                puts "Here are the open posts for \"#{title}\": "
+                book[0].posts.map do |post|
+                    puts post.content
+                end
+                # Another menu here
             end
         end
     end

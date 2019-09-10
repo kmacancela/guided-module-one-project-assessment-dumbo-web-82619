@@ -8,7 +8,7 @@ class Post < ActiveRecord::Base
     end
 
     def edit_post
-
+        
     end
 
 end

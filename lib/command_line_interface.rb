@@ -23,6 +23,65 @@ class CommandLineInterface
         end 
     end
 
+    # Will return a new post instance 
+    def new_post
+        puts "Let's create a new post! Please provide me with the following information: "
+        name = self.prompt.ask("What is the name of your book: ")
+        author = self.prompt.ask("What is the author of your book: ")
+        isbn = self.prompt.ask("What is the ISBN of your book: ")
+        # Find book in Books db table
+        book = Book.find_by(isbn: isbn)
+        # Find book does not exist in db table, then lets add this book
+        if book == nil
+            book = Book.create(name: name, author: author, isbn: isbn)
+        end
+        # Will find the location from the building name that user selects
+        building = self.prompt.select("Choose a location where to meet up: ") do |menu|
+            menu.choice "Powdermaker Hall"
+            menu.choice "I Building"
+            menu.choice "Kiely Hall"
+            menu.choice "Science Building"
+        end
+        location = Location.find_by(building: building)
+        content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
+        # Creates a new post with information provided by user
+        new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
+    end
+
+    def view_edit_posts
+        puts "Here are all your posts: "
+        self.view_posts
+        choice = self.prompt.select("What would you like to do: ") do |menu|
+            menu.choice "Edit a post"
+            menu.choice "Delete a post"
+            menu.choice "Return to main menu"
+        end
+
+        case choice
+        when "Edit a post"
+            self.edit_post
+        when "Delete a post"
+            self.delete_post
+        when "Return to main menu"
+            # method to return to main menu
+        end
+    end
+
+    def view_posts
+        self.user.posts.map do |post|
+            post.content
+        end
+    end
+    
+    def edit_post
+        choice = self.prompt.select("Please choose which post to edit: ", self.view_posts)
+
+    end
+
+    def delete_post
+        choice = self.prompt.select("Please choose which post to delete: ", self.view_posts)
+    end
+
     # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
     def posts
         choice = self.prompt.select("Hi there, #{self.user.name}! What would you like to do today?") do |menu|
@@ -34,29 +93,7 @@ class CommandLineInterface
 
         case choice
         when "Create a new post"
-            puts "Let's create a new post! Please provide me with some information: "
-            name = self.prompt.ask("What is the name of your book: ")
-            author = self.prompt.ask("What is the author of your book: ")
-            isbn = self.prompt.ask("What is the ISBN of your book: ")
-            # Find book in Books db table
-            book = Book.find_by(isbn: isbn)
-            # Find book does not exist in db table, then lets add this book
-            if book == nil
-                book = Book.create(name: name, author: author, isbn: isbn)
-            end
-            # Will find the location from the building name that user selects
-            building = self.prompt.select("Choose a location where to meet up: ") do |menu|
-                menu.choice "Powdermaker Hall"
-                menu.choice "I Building"
-                menu.choice "Kiely Hall"
-                menu.choice "Science Building"
-            end
-            location = Location.find_by(building: building)
-            content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
-
-            # Create a new post with information provided by user
-            new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
-            
+            self.new_post
             puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
             choice = self.prompt.select("What would you like to do now, #{self.user.name}? ") do |menu|
                 menu.choice "Edit this post"
@@ -68,7 +105,9 @@ class CommandLineInterface
             # Choices after user has uploaded a new post
             case choice
             when "Edit this post"
-                
+                option = self.prompt.select("Please choose which field to edit: ") do |menu|
+                    menu.choice ""
+                end
             when "Delete this post"
 
             when "View all my posts"
@@ -80,36 +119,10 @@ class CommandLineInterface
         when "Find a book"
             Book.find_book
         when "View or edit my posts"
-            self.user.posts.map do |post|
-                puts post.content
-            end
+            self.view_edit_posts
         when "Exit"
             # add what will happen
         end
     end
 
-
-
-    # Nick is working on the below:
-    #     puts ""
-    #     puts 'Welcome to Student Exchange - The Best Book-Exchanging Application on College Campuses throughout the USA!'
-    #     print " " * "Welcome to ".length
-    #     print "-" * "Student Exchange".length
-    #     print " " * " - The ".length
-    #     print "-" * "Best".length
-    #     print " " * " Book-Exchanging ".length
-    #     puts "-" * "App".length
-    #     choice = self.prompt.select("Sign Up / Sign In") do |menu|
-    #         puts "_" * "Sign Up / Sign In".length
-    #         menu.choice "New User"
-    #         menu.choice "Returning User"
-    #     end
-    #     case choice
-    #     when "New User"
-    #         User.new_user
-    #     when "Returning User"
-    #         User.existing_user
-    #     end
-    #     puts "Enter your name to view all your posts:"
-    #     name = gets.chomp
 end
