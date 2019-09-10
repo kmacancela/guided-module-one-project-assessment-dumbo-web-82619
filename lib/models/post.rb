@@ -39,7 +39,7 @@ class Post < ActiveRecord::Base
     #     end
     # end
 
-    def self.edit_post
+    def edit_post
 
     end
 
