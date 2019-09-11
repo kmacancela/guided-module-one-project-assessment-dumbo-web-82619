@@ -9,7 +9,15 @@ class CommandLineInterface
 
     # Will ask user if they are a new or returning user and returns the User object
     def greet
-        choice = self.prompt.select("Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!\nAre you a new user or returning user?") do |menu|
+        puts ""
+        puts 'Welcome to Student Exchange - The Best Book-Exchanging Application on College Campuses throughout the USA!'
+        print " " * "Welcome to ".length
+        print "-" * "Student Exchange".length
+        print " " * " - The ".length
+        print "-" * "Best".length
+        print " " * " Book-Exchanging ".length
+        puts "-" * "App".length
+        choice = self.prompt.select("Are you a new user or returning user?") do |menu|
             menu.choice "New User"
             menu.choice "Returning User"
         end
@@ -23,8 +31,8 @@ class CommandLineInterface
         end 
     end
 
-    # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
-    def posts
+    def main_menu
+
         choice = self.prompt.select("Hi there, #{self.user.name}! What would you like to do today?") do |menu|
             menu.choice "Create a new post"
             menu.choice "Find a book"
@@ -32,40 +40,66 @@ class CommandLineInterface
             menu.choice "Exit"
         end
 
-        case choice
+    end
+
+    def add_book
+
+        name = self.prompt.ask("What is the name of your book: ")
+        author = self.prompt.ask("Who is the author of your book: ")
+        isbn = self.prompt.ask("What is the ISBN of your book: ")
+
+        book = Book.find_by(isbn: isbn)
+        if book == nil
+            book = Book.create(name: name, author: author, isbn: isbn)
+        end
+
+    end
+
+    def meetup_location
+
+        self.prompt.select("Choose a location where to meet up: ") do |menu|
+            menu.choice "Powdermaker Hall"
+            menu.choice "I Building"
+            menu.choice "Kiely Hall"
+            menu.choice "Science Building"
+        end
+
+    end
+
+    def make_post
+
+        puts "Let's create a new post! Please provide me with some information: "
+        book = self.add_book
+        building = self.meetup_location
+        location = Location.find_by(building: building)
+        content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
+
+        new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
+        formatted_post = "#{self.user.username} is selling #{book.name} by #{book.author}.  You can find them at #{building}!"
+
+    end
+
+    def post_options
+
+        self.prompt.select("What would you like to do now, #{self.user.name}? ") do |menu|
+            menu.choice "Edit this post"
+            menu.choice "Delete this post"
+            menu.choice "View all my posts"
+            menu.choice "Logout"
+        end
+
+    end
+
+    # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
+    def posts
+
+        case choice = self.main_menu
         when "Create a new post"
-            puts "Let's create a new post! Please provide me with some information: "
-            name = self.prompt.ask("What is the name of your book: ")
-            author = self.prompt.ask("What is the author of your book: ")
-            isbn = self.prompt.ask("What is the ISBN of your book: ")
-            # Find book in Books db table
-            book = Book.find_by(isbn: isbn)
-            # Find book does not exist in db table, then lets add this book
-            if book == nil
-                book = Book.create(name: name, author: author, isbn: isbn)
-            end
-            # Will find the location from the building name that user selects
-            building = self.prompt.select("Choose a location where to meet up: ") do |menu|
-                menu.choice "Powdermaker Hall"
-                menu.choice "I Building"
-                menu.choice "Kiely Hall"
-                menu.choice "Science Building"
-            end
-            location = Location.find_by(building: building)
-            content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
 
-            # Create a new post with information provided by user
-            new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 0, location_id: location.id)
-            
-            puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
-            choice = self.prompt.select("What would you like to do now, #{self.user.name}? ") do |menu|
-                menu.choice "Edit this post"
-                menu.choice "Delete this post"
-                menu.choice "View all my posts"
-                menu.choice "Logout"
-            end
+            new_post = self.make_post
+            puts "You posted: #{new_post}"
+            choice = self.post_options
 
-            # Choices after user has uploaded a new post
             case choice
             when "Edit this post"
                 
@@ -85,6 +119,7 @@ class CommandLineInterface
             end
         when "Exit"
             # add what will happen
+            exit
         end
     end
 
