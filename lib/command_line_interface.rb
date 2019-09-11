@@ -9,10 +9,7 @@ class CommandLineInterface
 
     # Will ask user if they are a new or returning user and returns the User object
     def greet
-        choice = self.prompt.select("Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!\nAre you a new user or returning user?") do |menu|
-            menu.choice "New User"
-            menu.choice "Returning User"
-        end
+        choice = self.prompt.select("Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!\nAre you a new user or returning user?", ["New User", "Returning User", "Exit"])
 
         # Based on the user's choice, will redirect them to the appropriate User method
         case choice
@@ -20,6 +17,8 @@ class CommandLineInterface
             User.handle_new_user
         when "Returning User"
             User.handle_returning_user
+        when "Exit"
+            exit
         end 
     end
 
@@ -145,7 +144,7 @@ class CommandLineInterface
             puts "Sorry, there are no posts for this #{choice.downcase} at the moment. Check back soon!"
         else
             puts "Here are the available posts with this #{choice.downcase}: "
-            puts open_posts
+            puts open_posts # CHANGE THIS
             # Make this into a TTY table
         end
     end
@@ -157,9 +156,21 @@ class CommandLineInterface
         self.main_menu
     end
 
+    def delete_account
+        confirm = self.prompt.select("Are you sure you wish to delete your account? (We'll miss you!)", {Yes: 0, No: 1})
+        if confirm == 1
+            puts "Glad you decided to stay!"
+            self.main_menu
+        else 
+            self.user.destroy
+            puts "Your account has been destroyed! Muhaha! >:D"
+            self.greet
+        end
+    end
+
     # Will allow user to create a new post, find a book post(s), view/edit their posts, or exit to main menu
     def main_menu
-        choice = self.prompt.select("Hi there, #{self.user.name}! What would you like to do today?", ["Create a new post", "Find a book", "View or edit my posts", "Exit"])
+        choice = self.prompt.select("Hi there, #{self.user.name}! What would you like to do today?", ["Create a new post", "Find a book", "View or edit my posts", "Delete my account", "Logout"])
 
         case choice
         when "Create a new post"
@@ -168,9 +179,11 @@ class CommandLineInterface
             self.find_book
         when "View or edit my posts"
             self.view_edit_posts
-        when "Exit"
+        when "Delete my account"
+            self.delete_account
+        when "Logout"
             puts "Goodbye!"
-            exit
+            self.greet
         end
     end
 
