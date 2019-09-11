@@ -10,7 +10,7 @@ Course.destroy_all
 u1 = User.create(username: "hannah100", password: "hannah", name: "Hannah Jones")
 
 # Creating Books
-b1 = Book.create(name: "Psychology for Beginners", author: "Michelle Brown", isbn: "987654321")
+b1 = Book.create(title: "Psychology for Beginners", author: "Michelle Brown", isbn: "987654321")
 
 # Creating Locations
 l1 = Location.create(building: "Powdermaker Hall")
