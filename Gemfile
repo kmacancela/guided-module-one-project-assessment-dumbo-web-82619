@@ -3,8 +3,8 @@ source "https://rubygems.org"
 
 gem 'activerecord', "~>5.2.3"
 gem "sinatra-activerecord"
-gem "sqlite3"
 gem "pry"
+gem "sqlite3"
 gem "require_all"
 gem "faker"
 gem 'tty-prompt'
