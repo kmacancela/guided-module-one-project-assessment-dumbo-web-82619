@@ -7,8 +7,4 @@ class Post < ActiveRecord::Base
         TTY::Prompt.new
     end
 
-    def edit_post
-
-    end
-
 end
