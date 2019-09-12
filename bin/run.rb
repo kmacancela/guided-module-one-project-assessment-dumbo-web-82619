@@ -8,11 +8,3 @@ current_user = cli.greet
 while current_user == nil
     current_user = cli.greet
 end
-
-# We set the user instance object in CLI class to the user object we created (new user) or retrieved (returning user)
-cli.user = current_user
-
-cli.main_menu
-
-# binding.pry
-# 0

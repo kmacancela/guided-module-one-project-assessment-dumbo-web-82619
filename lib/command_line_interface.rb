@@ -12,35 +12,47 @@ class CommandLineInterface
         choice = self.prompt.select("Welcome to Student Exchange, the best book exchanging application on campuses throughout USA!\nAre you a new user or returning user?", ["New User", "Returning User", "Exit"])
 
         # Based on the user's choice, will redirect them to the appropriate User method
+        # We set the user instance object to the user object we created (new user) or retrieved (returning user)
         case choice
         when "New User"
-            User.handle_new_user
+            user = User.handle_new_user
+            self.user = user
+            self.main_menu
         when "Returning User"
-            User.handle_returning_user
+            user = User.handle_returning_user
+            self.user = user
+            self.main_menu
         when "Exit"
             exit
         end 
     end
 
-    # Will return a new post instance 
-    def new_post
-        puts "Let's create a new post! Please provide me with the following information: "
-        title = self.prompt.ask("What is the title of your book: ")
-        author = self.prompt.ask("What is the author of your book: ")
-        isbn = self.prompt.ask("What is the ISBN of your book: ")
-        # Find book in Books db table
-        book = Book.find_by(isbn: isbn)
-        # Find book does not exist in db table, then lets add this book
+    def spinner(content)
+        lines = [" | ", " / ", " - ", " \ ", " | "]
+        colors = []
+        5.times do
+            lines.length.times do |line|
+                system "clear"
+                puts lines[line] + content + lines[line]
+                sleep(0.1)
+            end
+        end
+        system "clear"
+        return " "
+    end
+
+    def new_post_create(book, title = nil, author = nil, isbn= nil)
         if book == nil
             book = Book.create(title: title, author: author, isbn: isbn)
         end
+        # end
         # Will find the location from the building name that user selects
         building = self.prompt.select("Choose a location where to meet up: ", ["Powdermaker Hall", "I Building", "Kiely Hall", "Science Building"])
         location = Location.find_by(building: building)
         content = self.prompt.ask("Provide your potential buyers with a small description (signs of wear, price, special instructions, etc): ")
         # Creates a new post with information provided by user
         new_post = Post.create(user_id: self.user.id, book_id: book.id, content: content, date: "#{Time.now.year}-#{Time.now.month}-#{Time.now.day}", status: 1, location_id: location.id)
-
+        self.spinner("Uploading")
         puts "Success! Your post has been uploaded and can be viewed by potential buyers!"
         choice = self.prompt.select("What would you like to do now, #{self.user.name}? ", ["Edit this post", "Delete this post", "Return to main menu"])
 
@@ -52,6 +64,27 @@ class CommandLineInterface
             self.delete_post(new_post)
         when "Return to main menu"
             self.main_menu
+        end
+    end
+
+    # Will return a new post instance 
+    def new_post
+        puts "Let's create a new post! Please provide me with the following information: "
+        
+
+        isbn = self.prompt.ask("What is the ISBN of your book: ")
+        book = Book.find_by(isbn: isbn)
+        if book != nil
+            confirm = self.prompt.select("Are you looking for #{book.title} by #{book.author}? ", ["Yes", "No"])
+            if confirm == "No"
+                self.main_menu
+            else
+                self.new_post_create(book)
+            end
+        else # if book is nil
+            title = self.prompt.ask("What is the title of your book: ")
+            author = self.prompt.ask("What is the author of your book: ")
+            self.new_post_create(book, title, author, isbn)
         end
     end
 
@@ -70,9 +103,10 @@ class CommandLineInterface
         end
     end
 
+    # Will show all users all their posts and reloads from db each time
     def view_posts
         self.user.posts.map do |post|
-            post.content
+            post.reload.content
         end
     end
     
@@ -114,13 +148,18 @@ class CommandLineInterface
 
     def delete_post(post = nil)
         if post == nil
-            choice = self.prompt.select("Please choose which post to delete: ", self.view_posts)
-            post = Post.find_by(content: choice)
-        end
-        confirm = self.prompt.select("Are you sure you wish to delete this post? ", ["Yes", "No"])
-        if confirm == "Yes"
-            post.destroy
-            puts "Your post has been deleted!"
+            choice = self.prompt.select("Please choose which post to delete: ", [self.view_posts, "Back to main menu"])
+            if choice == "Back to main menu"
+                abort
+            else
+                post = Post.find_by(content: choice)
+            end
+        else
+            confirm = self.prompt.select("Are you sure you wish to delete this post? ", ["Yes", "No"])
+            if confirm == "Yes"
+                post.destroy
+                puts "Your post has been deleted!"
+            end
         end
         self.main_menu
     end
@@ -131,6 +170,7 @@ class CommandLineInterface
         book = Book.where("#{choice.downcase} LIKE ?", "%#{input}%")
         if book[0] == nil
             open_posts = nil
+            puts "Sorry, no such book :("
         else
             book_posts = book.map do |book|
                 book.posts
@@ -143,9 +183,48 @@ class CommandLineInterface
         if open_posts == nil
             puts "Sorry, there are no posts for this #{choice.downcase} at the moment. Check back soon!"
         else
+
             puts "Here are the available posts with this #{choice.downcase}: "
-            puts open_posts # CHANGE THIS
-            # Make this into a TTY table
+            format = open_posts.map do |post|
+                "#{User.find_by(id: post.user_id).name} says #{post.content} about #{Book.find_by(id: post.book_id).title} by #{Book.find_by(id: post.book_id).author} - They will be located in #{Location.find_by(id: post.location_id).building}"
+            end
+            puts format
+
+            # post_info = open_posts.map do |post|
+            #     # {post => post.content}
+            #     [post.content, post.user.name, post.location.building]
+            # end
+
+            # # index = 0
+            # contents = []
+            # users = []
+            # locations = []
+            # index = 0
+            # post_info.each do |element|
+            #     # puts index
+            #     if index % 3 == 0
+            #         contents << element
+            #     elsif index % 3 == 1
+            #         users << element
+            #     else
+            #         locations << element
+            #     end
+            #     index += 1
+            # end
+
+            # puts "Contents: "
+            # puts contents
+
+
+
+
+
+            # puts "Here are the available posts with this #{choice.downcase}: "
+            # puts post_info.flatten[0] # CHANGE THIS
+            # puts post_info.flatten[1]
+            # puts post_info.flatten[2]
+            # puts post_info.flatten[3]
+            # # Make this into a TTY table
         end
     end
 
@@ -163,7 +242,201 @@ class CommandLineInterface
             self.main_menu
         else 
             self.user.destroy
-            puts "Your account has been destroyed! Muhaha! >:D"
+            puts ">:D Your account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:DYour account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|our account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dour account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|ur account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dur account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|r account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dr account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:| account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:D account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|account has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Daccount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|ccount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dccount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|count has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dcount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|ount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dount has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|unt has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dunt has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|nt has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dnt has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|t has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dt has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:| has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:D has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|has been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dhas been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|as been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Das been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|s been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Ds been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:| been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:D been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|been destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dbeen destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|een destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Deen destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|en destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Den destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|n destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dn destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:| destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:D destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Ddestroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|estroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Destroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|stroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dstroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|troyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dtroyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|royed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Droyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|oyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Doyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|yed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dyed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|ed! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Ded! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|d! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:Dd! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:|! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:D! Muhaha!"
+            sleep(0.1)
+            system "clear"
+            puts ">:| Muhaha!"
+            sleep(0.1)
+            system "clear"
             self.greet
         end
     end

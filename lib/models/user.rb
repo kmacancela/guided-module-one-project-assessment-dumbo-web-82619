@@ -10,17 +10,28 @@ class User < ActiveRecord::Base
         taken = true
         while taken do
 
-            username = self.prompt.ask("Enter a username: ")
+            puts " "
+            username_prompt = "Enter a " + "username: ".colorize(:light_blue)
+            username = self.prompt.ask(username_prompt)
+            puts "-" * "Enter a username: ".length
+            puts String.modes
 
             if User.find_by(username: username)
-                puts "Username is taken, please enter another."
+                puts " "
+                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
+                statement = "Username is " + "taken".upcase.colorize(:red) + ", please enter another."
+                puts statement
+                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
+                puts " "
             else
                 taken = false
             end
 
         end
         password = self.prompt.mask("Enter a password: ")
+        puts "-" * "Enter a password: ".length
         name = self.prompt.ask("Enter your name: ")
+        puts "-" * "Enter your name: ".length
         User.create(username: username, password: password, name: name)
     end
 
@@ -61,7 +72,6 @@ class User < ActiveRecord::Base
                     time -= 1
                     sleep(1)
                 end
-                # sleep(i * 36)
             end
         end
         login
