@@ -9,35 +9,34 @@ class User < ActiveRecord::Base
     def self.handle_new_user
         taken = true
         while taken do
-
+    
             puts " "
-            username_prompt = "Enter a " + "username: ".colorize(:light_blue)
+            username_prompt = "Enter a #{'username'.colorize(:light_blue)}:"
             username = self.prompt.ask(username_prompt)
-            puts "-" * "Enter a username: ".length
-            puts String.modes
-
+            puts "-" * "Enter a username:".length
+    
             if User.find_by(username: username)
                 puts " "
-                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
-                statement = "Username is " + "taken".upcase.colorize(:red) + ", please enter another."
-                puts statement
-                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
+                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
+                statement = " Username is " + "taken".upcase.colorize(:red) + ", please enter another. "
+                puts "!!!".yellow.on_light_red.blink + statement + "!!!".yellow.on_light_red.blink
+                puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".yellow.on_light_red.blink
                 puts " "
             else
                 taken = false
             end
-
+    
         end
-        password = self.prompt.mask("Enter a password: ")
+        password = self.prompt.mask("Enter a #{"password".colorize(:light_yellow)}: ")
         puts "-" * "Enter a password: ".length
-        name = self.prompt.ask("Enter your name: ")
+        name = self.prompt.ask("Enter your #{'name: '.colorize(:light_cyan)}")
         puts "-" * "Enter your name: ".length
         User.create(username: username, password: password, name: name)
     end
 
     def self.handle_returning_user
         i = 0
-        username = self.prompt.ask("Welcome back! Enter your username: ")
+        username = self.prompt.ask("Welcome back! 🔥 Enter your username: ")
         login = User.find_by(username: username)
         until login do 
             puts "Username not found, please enter valid username"

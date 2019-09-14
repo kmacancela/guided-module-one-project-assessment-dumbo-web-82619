@@ -10,3 +10,5 @@ gem "faker"
 gem 'tty-prompt'
 gem 'tty-table'
 gem 'colorize'
+gem 'terminal-table'
+gem 'table_print'
